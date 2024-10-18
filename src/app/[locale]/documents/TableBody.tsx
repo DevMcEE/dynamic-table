@@ -1,24 +1,32 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { HeaderName, Document } from "./documents.types";
 import { TableRow } from "./TableRow";
 import { documentEventEmitter } from "./documentEventEmitter";
 
 interface TableBodyProps {
   headers: HeaderName[],
+  bottomObserver: MutableRefObject<IntersectionObserver | null>
+  topObserver: MutableRefObject<IntersectionObserver | null>
 }
 
-export const TableBody = ({ headers }: TableBodyProps) => {
-  const [documents, setDocuments] = useState< Document[]>([]);
-  const tBodyRef = useRef<HTMLTableSectionElement>(null);
-  const indexStart = useRef(0)
-  
+export const TableBody = ({ headers, bottomObserver, topObserver }: TableBodyProps) => {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const indexStart = useRef(0);
+  const tableBodyRef = useRef<HTMLTableSectionElement | null>(null)
+
+  const topTrigger = useRef<HTMLTableRowElement | null>(null);
+  const bottomTrigger = useRef<HTMLTableRowElement | null>(null);
+
+
   useEffect(() => {
     documentEventEmitter.on('documentsUpdated', (args) => {
+      bottomObserver.current?.disconnect()
+      topObserver.current?.disconnect()
       //@ts-ignore
-      const {documents: _documents, indexStart: _indexStart} = args;
-      console.log({ _documents, _indexStart})
+      const { documents: _documents, indexStart: _indexStart } = args;
+      console.log({ _documents, _indexStart })
       indexStart.current = _indexStart;
       setDocuments(() => [..._documents as Document[]]);
     });
@@ -31,14 +39,32 @@ export const TableBody = ({ headers }: TableBodyProps) => {
   useEffect(() => {
     console.log('indexStart', indexStart.current)
     documentEventEmitter.emit('documentsRerendered', true)
+    if (topObserver.current && topTrigger.current) {
+      topObserver.current?.observe(topTrigger.current as Element)
+      console.log('subscibed topTrigger', topTrigger.current)
+    }
+    if (bottomObserver.current && bottomTrigger.current) {
+      bottomObserver.current?.observe(bottomTrigger.current as Element)
+      console.log('subscibed bottomTrigger', bottomTrigger.current)
+    }
   });
-  
+
   return (
-    <tbody ref={tBodyRef} >
-      {!documents.length && <tr><td style={{ textAlign: 'center'}} colSpan={headers.length}> Loading ... </td></tr>}
+    <tbody ref={tableBodyRef}>
+      {!documents.length && <tr><td style={{ textAlign: 'center' }} colSpan={headers.length}> Loading ... </td></tr>}
       {
         documents.map((document, i) => {
-          return <TableRow key={document.id} document={document} headers={headers} index={indexStart.current + i} />
+          const isTopRefIndex = i === Math.floor(documents.length * 0.3);
+          const isBottomRefIndex = i === Math.ceil(documents.length * 0.8);
+
+          return <TableRow
+            classes={isBottomRefIndex ? 'with-bottom-ref' : isTopRefIndex ? 'with-top-ref' : ''}
+            ref={isBottomRefIndex ? bottomTrigger : isTopRefIndex ? topTrigger : null}
+            key={document.id}
+            document={document}
+            headers={headers}
+            index={indexStart.current + i}
+          />
         })
       }
     </tbody>

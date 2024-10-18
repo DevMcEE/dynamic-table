@@ -1,10 +1,11 @@
 'use client';
+import { forwardRef, LegacyRef } from "react";
 import { HeaderName, Document } from "./documents.types";
 import { TableCell } from "./TableCell";
 
-export const TableRow = ({ document, headers, index}: TableRowProps) => {
+export const TableRow =  forwardRef(({ document, headers, index, classes = '' }: TableRowProps, ref: LegacyRef<HTMLTableRowElement> ) => {
   return (
-    <tr key={document.id} id={`${document.id}`}>
+    <tr ref={ref} key={document.id} id={`${document.id}`} className={classes}>
       {
         headers.map((header) => {
           let value;
@@ -35,10 +36,11 @@ export const TableRow = ({ document, headers, index}: TableRowProps) => {
       }
     </tr>
   )
-}
+})
 
 interface TableRowProps {
   document: Document,
   headers:  HeaderName[], 
-  index: number
+  index: number,
+  classes?: string
 } 

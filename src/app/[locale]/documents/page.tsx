@@ -10,7 +10,7 @@ import { HeaderName } from "./documents.types";
 import { TableHeader } from "./TableHeader";
 import { TableBody } from "./TableBody";
 import { useEffect, useRef } from "react";
-import { documentEventEmitter } from "./documentEventEmitter";
+import { useIntersectionObservers } from "./useIntersectionObservers";
 
 const headers = [
   HeaderName.index,
@@ -28,16 +28,13 @@ export default function Page({ params }: PageProps) {
   const { documentsAmount, coordinates: coordintates } = useData();
   
   const pageRef = useRef<HTMLDivElement>(null);
+  const { topObserver, bottomObserver } = useIntersectionObservers(pageRef.current);
+
 
   useEffect(() => {
     if (pageRef.current) {
       console.log( pageRef.current)
       pageRef.current.addEventListener(('scroll'), (event) => {
-        // @ts-ignore
-        // console.log({scrollTop: event.target.scrollTop, scrollHeight: event.target.scrollHeight - window.innerHeight })
-        // @ts-ignore
-        documentEventEmitter.emit('scroll', event.target.scrollTop/(event.target.scrollHeight - window.innerHeight)*100)
-        // @ts-ignore
       })
     }
   }, [pageRef.current])
@@ -63,7 +60,7 @@ export default function Page({ params }: PageProps) {
           <thead>
             <TableHeader headers={headers} />
           </thead>
-          <TableBody  headers={headers} />
+          <TableBody bottomObserver={bottomObserver} topObserver={topObserver} headers={headers} />
         </table>
       </div>
     </div>

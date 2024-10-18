@@ -73,3 +73,10 @@ table tbody tr td:first-child {
 th.sortable {
   cursor: pointer;
 }
+
+tr.with-bottom-ref {
+  background-color: red;
+}
+tr.with-top-ref {
+  background-color: green;
+}
