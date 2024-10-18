@@ -10,7 +10,7 @@
     "test": "jest __tests__"
   },
   "dependencies": {
-    "next": "14.2.9",
+    "next": "^14.2.15",
     "next-intl": "^3.20.0",
     "react": "^18",
     "react-dom": "^18"
@@ -19,7 +19,7 @@
     "@jest/globals": "^29.7.0",
     "@playwright/test": "^1.47.1",
     "@types/jest": "^29.5.13",
-    "@types/node": "^20",
+    "@types/node": "^22.7.6",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
