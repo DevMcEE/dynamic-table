@@ -28,6 +28,7 @@ export default function Page({ params }: PageProps) {
   const { documentsAmount, coordinates: coordintates } = useData();
   
   const pageRef = useRef<HTMLDivElement>(null);
+  const isProcessing = useRef(false);
 
   useEffect(() => {
     if (pageRef.current) {
@@ -41,11 +42,25 @@ export default function Page({ params }: PageProps) {
       })
     }
   }, [pageRef.current])
+
+  useEffect(() => {
+    
+    documentEventEmitter.emit('loading', true);
+    fetch('/api/documents')
+      .then(response => {
+        return response.json();
+      })
+      .then((documents) => {
+        documentEventEmitter.emit('documentsFetched', { data: documents });
+        documentEventEmitter.emit('loading', false);
+      })
+  }, [])
   
   return (
     <div ref={pageRef} className="page">
       <div className="header-container">
         <div className="page-header" >
+          <Link style={{ paddingRight: 10, }} href={'/'} >{'<'}</Link>
           <Link style={{ paddingRight: 10, textDecoration: params.locale === "en" ? "underline" : "none" }} href={'/documents'} locale="en" >EN</Link>
           <Link style={{ paddingRight: 10, textDecoration: params.locale === "ru" ? "underline" : "none" }} href={'/documents'} locale="ru">RU</Link>
         </div>

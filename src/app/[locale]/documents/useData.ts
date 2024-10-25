@@ -6,17 +6,17 @@ import { documentEventEmitter } from "./documentEventEmitter";
 import { Coordinates, shiftCoordinates } from "@/app/utils/shiftCoordinates";
 
 // const DOCUMENTS_TEMP_LIMIT = 1000;
-const DOCUMENTS_RENDER_LIMIT = 35;
+const DOCUMENTS_RENDER_LIMIT = 40;
 
 // const ALL_DATA = (data as Document[]).slice(0, DOCUMENTS_TEMP_LIMIT);
 
 const INIT_COORDINATES: Coordinates = {
   start: 0,
-  end: 4* DOCUMENTS_RENDER_LIMIT,
+  end: 500,
 };
 
 export const useData = () => {
-  const [documents, setDocuments] = useState( (data as Document[]).slice(INIT_COORDINATES.start, INIT_COORDINATES.end));
+  const [documents, setDocuments] = useState< Document[]>([]);
   const [sorter, setSorter] = useState<{ key: keyof Document, isAscending: boolean}>( { key: 'id', isAscending: true });
   const prevScrollPosition = useRef(0);
   const isRendering = useRef(false);
@@ -52,6 +52,10 @@ export const useData = () => {
   }, [sorter.isAscending, sorter.key])
 
   useEffect(() => {
+    //@ts-ignore
+    documentEventEmitter.on('documentsFetched', ({ data }) => {
+      setDocuments(data);
+    });
     //@ts-ignore
     documentEventEmitter.on('sortDocuments', ({key, isAscending: isAscending}) => {
       isRendering.current = true

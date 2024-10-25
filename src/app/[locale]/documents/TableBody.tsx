@@ -11,6 +11,7 @@ interface TableBodyProps {
 
 export const TableBody = ({ headers }: TableBodyProps) => {
   const [documents, setDocuments] = useState< Document[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const tBodyRef = useRef<HTMLTableSectionElement>(null);
   const indexStart = useRef(0)
   
@@ -22,7 +23,10 @@ export const TableBody = ({ headers }: TableBodyProps) => {
       indexStart.current = _indexStart;
       setDocuments(() => [..._documents as Document[]]);
     });
-
+    documentEventEmitter.on('loading', (loading) => {
+     setIsLoading(loading as boolean);
+    });
+    
     return () => {
       documentEventEmitter.unsubscribe('documentsUpdated')
     }
@@ -35,9 +39,9 @@ export const TableBody = ({ headers }: TableBodyProps) => {
   
   return (
     <tbody ref={tBodyRef} >
-      {!documents.length && <tr><td style={{ textAlign: 'center'}} colSpan={headers.length}> Loading ... </td></tr>}
+      {(isLoading || !documents.length) && (<tr><td style={{ textAlign: 'center'}} colSpan={headers.length}> Loading ... </td></tr>)}
       {
-        documents.map((document, i) => {
+        !isLoading && documents.map((document, i) => {
           return <TableRow key={document.id} document={document} headers={headers} index={indexStart.current + i} />
         })
       }
