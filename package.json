@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -p 3100",
     "lint": "next lint",
-    "test": "jest __tests__"
+    "test": "jest __tests__",
+    "generate": "node .dataGenerator/generate.mjs"
   },
   "dependencies": {
     "next": "^14.2.15",
