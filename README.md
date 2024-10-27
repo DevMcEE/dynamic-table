@@ -1,5 +1,5 @@
 # Dynamic table 
-Handles 100k+ rows in optimal for rendering way.
+Handles Unlimited amount of data in the optimal for rendering, customizable  way(limited amount).
 
 Lazy loading based on 2 different techniques:
 

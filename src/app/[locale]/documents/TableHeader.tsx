@@ -1,9 +1,7 @@
 'use client';
 import { useTranslations } from "next-intl";
-import { Document, DocumentFieldName, HeaderName } from "./documents.types";
-import { memo, useCallback, useState } from "react";
-import { useData } from "./useData";
-import { SortDirection } from "@/global.types";
+import { DocumentFieldName, HeaderName } from "./documents.types";
+import { useState } from "react";
 import { documentEventEmitter } from "./documentEventEmitter";
 
 interface TableHeaderProps {

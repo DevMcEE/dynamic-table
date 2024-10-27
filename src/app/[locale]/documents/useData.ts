@@ -1,4 +1,3 @@
-import data from "@/assets/data/document-list.mocked-data.json";
 import { Document, DocumentFieldName } from "@/app/[locale]/documents/documents.types"
 import { useCallback, useEffect, useRef, useState } from "react";
 import { sortByKey } from "@/app/utils/sortByKey";
@@ -6,7 +5,7 @@ import { documentEventEmitter } from "./documentEventEmitter";
 import { Coordinates, shiftCoordinates } from "@/app/utils/shiftCoordinates";
 
 // const DOCUMENTS_TEMP_LIMIT = 1000;
-const DOCUMENTS_RENDER_LIMIT = 40;
+const DOCUMENTS_RENDER_LIMIT = 100;
 
 // const ALL_DATA = (data as Document[]).slice(0, DOCUMENTS_TEMP_LIMIT);
 
@@ -16,6 +15,7 @@ const INIT_COORDINATES: Coordinates = {
 };
 
 export const useData = () => {
+  const allDocuments = useRef<Document[]>([])
   const [documents, setDocuments] = useState< Document[]>([]);
   const [sorter, setSorter] = useState<{ key: keyof Document, isAscending: boolean}>( { key: 'id', isAscending: true });
   const prevScrollPosition = useRef(0);
@@ -23,14 +23,12 @@ export const useData = () => {
 
   const [coordinates, setCoordinates] = useState<Coordinates>(INIT_COORDINATES);
 
-  const sortDocuments = useCallback((key: DocumentFieldName, isAscending: boolean) => {
-    setDocuments((prev) => sortByKey<Document>({ 
-      data: prev, 
-      key,
-      isAscending
-    })
-  )
-  }, []);
+  const handleDocumentsUpdate = (data: Document[]) => {
+    allDocuments.current = data;
+
+    const initChunk = data.slice(INIT_COORDINATES.start, INIT_COORDINATES.end);
+    setDocuments(() =>initChunk );
+  }
 
   useEffect(() => {
     if (documents.length) {
@@ -42,19 +40,19 @@ export const useData = () => {
     console.log('Sorting')
       // documentEventEmitter.emit('documentsUpdated', {sorted, indexStart: coordinates.start});
       const sorted = sortByKey<Document>({ 
-        data:  (data as Document[]), 
+        data:  (allDocuments.current as Document[]), 
         ...sorter
       }).slice(coordinates.start, coordinates.end);
     console.log('Sorting sorted')
 
       setDocuments(() => sorted);
 
-  }, [sorter.isAscending, sorter.key])
+  }, [sorter.isAscending, sorter.key, allDocuments.current])
 
   useEffect(() => {
     //@ts-ignore
     documentEventEmitter.on('documentsFetched', ({ data }) => {
-      setDocuments(data);
+      handleDocumentsUpdate(data)
     });
     //@ts-ignore
     documentEventEmitter.on('sortDocuments', ({key, isAscending: isAscending}) => {
@@ -70,7 +68,7 @@ export const useData = () => {
       prevScrollPosition.current = (position as number);
 
       if (!isRendering.current && (directionFactor > 0 ? ((position as number) > 80): (position as number) < 30)) {
-        setCoordinates((prev) => shiftCoordinates({  maxEnd:  (data as Document[]).length, coordinates: prev, shift:  DOCUMENTS_RENDER_LIMIT * directionFactor }));
+        setCoordinates((prev) => shiftCoordinates({  maxEnd:  (allDocuments.current as Document[]).length, coordinates: prev, shift:  DOCUMENTS_RENDER_LIMIT * directionFactor }));
 
         isRendering.current = true
       }
@@ -84,9 +82,9 @@ export const useData = () => {
   }, []);
 
   useEffect(() => {
-    setDocuments(() =>  (data as Document[]).slice(coordinates.start, coordinates.end))
+    setDocuments(() =>  allDocuments.current.slice(coordinates.start, coordinates.end))
     // setDocuments(() => ALL_DATA.slice(coordinates.start, coordinates.end))
   }, [coordinates.end, coordinates.start]);
 
-  return {documents, documentsAmount:  (data as Document[]).length, sortDocuments, coordinates: coordinates}
+  return {documents, documentsAmount:  allDocuments.current.length, coordinates: coordinates}
 }

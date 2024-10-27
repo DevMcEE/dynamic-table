@@ -2,7 +2,7 @@ export class EventEmitter {
   private listeners: Record<string, Set<(args: unknown) => void> > = {};
 
   on(eventName: string, callBack: (args: unknown) => void) {
-    console.log('called on ', eventName)
+    // console.log('called on ', eventName)
     if (eventName in this.listeners) {
       this.listeners[eventName].add(callBack);
     } else {
@@ -12,7 +12,7 @@ export class EventEmitter {
   }
 
   emit(eventName: string, args: unknown) {
-    console.log('emit called',{ eventName, args})
+    console.log('emit called',{ eventName })
     if (eventName in this.listeners) {
       this.listeners[eventName].forEach((callBack) => {
         callBack(args);
@@ -21,7 +21,7 @@ export class EventEmitter {
   }
 
   unsubscribe(eventName: string) {
-    console.log('called unsubsribe from ', eventName)
+    // console.log('called unsubsribe from ', eventName)
 
     if (eventName in this.listeners) {
       delete this.listeners[eventName];

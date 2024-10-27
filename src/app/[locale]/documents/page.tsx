@@ -28,7 +28,6 @@ export default function Page({ params }: PageProps) {
   const { documentsAmount, coordinates: coordintates } = useData();
   
   const pageRef = useRef<HTMLDivElement>(null);
-  const isProcessing = useRef(false);
 
   useEffect(() => {
     if (pageRef.current) {
@@ -44,14 +43,15 @@ export default function Page({ params }: PageProps) {
   }, [pageRef.current])
 
   useEffect(() => {
-    
     documentEventEmitter.emit('loading', true);
-    fetch('/api/documents')
+    fetch('/api/documents', { cache: 'no-cache'})
       .then(response => {
         return response.json();
       })
       .then((documents) => {
-        documentEventEmitter.emit('documentsFetched', { data: documents });
+        console.log(documents)
+        documentEventEmitter.emit('documentsFetched',documents);
+      }).finally(()=>{
         documentEventEmitter.emit('loading', false);
       })
   }, [])
@@ -65,7 +65,7 @@ export default function Page({ params }: PageProps) {
           <Link style={{ paddingRight: 10, textDecoration: params.locale === "ru" ? "underline" : "none" }} href={'/documents'} locale="ru">RU</Link>
         </div>
         <div className="info-block">
-          <span className="info-block-item">{t("rendered", { amount: coordintates.end - coordintates.start})}</span>
+          <span className="info-block-item">{t("rendered", { amount: documentsAmount > 0 ? coordintates.end - coordintates.start : 0})}</span>
           <span className="info-block-item">{t("allDocuments", { amount: documentsAmount})}</span>
           <span className="info-block-item">{t("start", { start: coordintates.start })}</span>
           <span className="info-block-item">{t("end", { end: coordintates.end })}</span>
