@@ -23,25 +23,12 @@ const headers = [
   HeaderName.documentTotalAmount,
 ] as HeaderName[];
 
-export default function Page({ params }: PageProps) {
-  const t = useTranslations('DocumentsPage');
+const TableStatHeader = ({ params }: PageProps) => {
   const { documentsAmount, coordinates: coordintates } = useData();
-  
-  const pageRef = useRef<HTMLDivElement>(null);
-  const { topObserver, bottomObserver } = useIntersectionObservers(pageRef.current);
+  const t = useTranslations('DocumentsPage');
 
-
-  useEffect(() => {
-    if (pageRef.current) {
-      console.log( pageRef.current)
-      pageRef.current.addEventListener(('scroll'), (event) => {
-      })
-    }
-  }, [pageRef.current])
-  
   return (
-    <div ref={pageRef} className="page">
-      <div className="header-container">
+    <div className="header-container">
         <div className="page-header" >
           <Link style={{ paddingRight: 10, textDecoration: params.locale === "en" ? "underline" : "none" }} href={'/documents'} locale="en" >EN</Link>
           <Link style={{ paddingRight: 10, textDecoration: params.locale === "ru" ? "underline" : "none" }} href={'/documents'} locale="ru">RU</Link>
@@ -53,14 +40,29 @@ export default function Page({ params }: PageProps) {
           <span className="info-block-item">{t("end", { end: coordintates.end })}</span>
         </div>
       </div>
+  )
+}
+export default function Page({ params }: PageProps) {
+  const pageRef = useRef<HTMLDivElement>(null);
 
+
+  useEffect(() => {
+    if (pageRef.current) {
+      console.log( pageRef.current)
+    }
+  }, [pageRef.current])
+  
+  return (
+    <div ref={pageRef} className="page">
+      
+      <TableStatHeader params={params} />
       <div className="table-container">
 
         <table className="table">
           <thead>
             <TableHeader headers={headers} />
           </thead>
-          <TableBody bottomObserver={bottomObserver} topObserver={topObserver} headers={headers} />
+          <TableBody pageRef={pageRef} headers={headers} />
         </table>
       </div>
     </div>

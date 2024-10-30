@@ -1,17 +1,18 @@
 'use client';
 
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { HeaderName, Document } from "./documents.types";
 import { TableRow } from "./TableRow";
 import { documentEventEmitter } from "./documentEventEmitter";
+import { useIntersectionObservers } from "./useIntersectionObservers";
 
 interface TableBodyProps {
   headers: HeaderName[],
-  bottomObserver: MutableRefObject<IntersectionObserver | null>
-  topObserver: MutableRefObject<IntersectionObserver | null>
+  pageRef: RefObject<HTMLDivElement>,
 }
 
-export const TableBody = ({ headers, bottomObserver, topObserver }: TableBodyProps) => {
+export const TableBody = ({ headers, pageRef }: TableBodyProps) => {
+  const { topObserver, bottomObserver } = useIntersectionObservers(pageRef.current);
   const [documents, setDocuments] = useState<Document[]>([]);
   const indexStart = useRef(0);
   const tableBodyRef = useRef<HTMLTableSectionElement | null>(null)
@@ -37,12 +38,14 @@ export const TableBody = ({ headers, bottomObserver, topObserver }: TableBodyPro
   }, []);
 
   useEffect(() => {
-    console.log('indexStart', indexStart.current)
-    documentEventEmitter.emit('documentsRerendered', true)
+    console.log('indexStart', indexStart.current, topObserver, bottomObserver)
+    documentEventEmitter.emit('documentsRerendered', true);
+
     if (topObserver.current && topTrigger.current) {
       topObserver.current?.observe(topTrigger.current as Element)
       console.log('subscibed topTrigger', topTrigger.current)
     }
+
     if (bottomObserver.current && bottomTrigger.current) {
       bottomObserver.current?.observe(bottomTrigger.current as Element)
       console.log('subscibed bottomTrigger', bottomTrigger.current)

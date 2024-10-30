@@ -9,7 +9,7 @@ const DOCUMENTS_RENDER_LIMIT = 100;
 
 const INIT_COORDINATES: Coordinates = {
   start: 0,
-  end: 3* DOCUMENTS_RENDER_LIMIT,
+  end: 5* DOCUMENTS_RENDER_LIMIT,
 };
 
 export const useData = () => {
@@ -46,15 +46,16 @@ export const useData = () => {
   useEffect(() => {
     //@ts-ignore
     documentEventEmitter.on('sortDocuments', ({key, isAscending: isAscending}) => {
-      isRendering.current = true
       setSorter({ key, isAscending })
     });
 
     documentEventEmitter.on('bottomRefTriggered', () => {
+      console.log('current', isRendering.current)
+      
       if (!isRendering.current) {
         setCoordinates((prev) => shiftCoordinates({  maxEnd:  (data as Document[]).length, coordinates: prev, shift:  DOCUMENTS_RENDER_LIMIT  }));
 
-        isRendering.current = true;
+        
       }
     });
 
@@ -62,7 +63,6 @@ export const useData = () => {
       if (!isRendering.current) {
         setCoordinates((prev) => shiftCoordinates({  maxEnd:  (data as Document[]).length, coordinates: prev, shift:  -1 * DOCUMENTS_RENDER_LIMIT  }));
 
-        isRendering.current = true;
       }
     });
 
@@ -73,6 +73,7 @@ export const useData = () => {
   }, []);
 
   useEffect(() => {
+    isRendering.current = true;
     setDocuments(() =>  (data as Document[]).slice(coordinates.start, coordinates.end))
   }, [coordinates.end, coordinates.start]);
 
